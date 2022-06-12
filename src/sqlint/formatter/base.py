@@ -24,22 +24,26 @@ def format(tree: SyntaxTree, config: Config) -> SyntaxTree:
     """
 
     if not tree.is_abstract:
-        raise ValueError('Failed to format, because target SyntaxTree is not Abstract')
+        raise ValueError(
+            "Failed to format, because target SyntaxTree is not Abstract"
+        )
 
     # create a tree having single leaf
     root: SyntaxTree = SyntaxTree(depth=0, line_num=0, is_abstract=True)
     leaf: SyntaxTree = SyntaxTree(
-                        depth=1,
-                        line_num=1,
-                        tokens=_gather_tokens(tree),
-                        parent=root,
-                        is_abstract=True)
+        depth=1,
+        line_num=1,
+        tokens=_gather_tokens(tree),
+        parent=root,
+        is_abstract=True,
+    )
     root.add_leaf(leaf)
 
     # reshapes tree
     _reshape_tree(leaf, config)
 
-    # for examples inserting indent or whitespaces, re-formating keyword and positioning comma, etc
+    # for examples inserting indent or whitespaces, re-formating keyword and
+    # positioning comma, etc
     _format_tree(root, config)
 
     return root
@@ -68,15 +72,17 @@ def _reshape_tree(tree: SyntaxTree, config: Config):
     siblings = [sibling]
 
     # f own and own[0].word.lower() == 'date_diff':
-    logger.debug(f'\033[32mown\033[0m = {own}')
-    logger.debug(f'\033[32mchildren\033[0m = {children}')
-    logger.debug(f'\033[32msibling\033[0m = {sibling}')
+    logger.debug("\033[32mown\033[0m = %s", own)
+    logger.debug("\033[32mchildren\033[0m = %s", children)
+    logger.debug("\033[32msibling\033[0m = %s", sibling)
 
     tree.tokens = own
 
     # checks tokens(line) length
     tokens_and_spaces = fmt.WhiteSpacesFormatter.format_tokens(own)
-    length = sum([len(tkn) for tkn in tokens_and_spaces]) + config.indent_steps*(tree.depth-1)
+    length = sum(
+        [len(tkn) for tkn in tokens_and_spaces]
+    ) + config.indent_steps * (tree.depth - 1)
     max_length = config.max_line_length
 
     if length > max_length:
@@ -91,30 +97,37 @@ def _reshape_tree(tree: SyntaxTree, config: Config):
         children = _c + children
         siblings.insert(0, _s)
 
+    _tree: SyntaxTree
+
     for chn in children:
         if chn:
-            _tree: SyntaxTree = SyntaxTree(
-                depth=tree.depth+1,
+            _tree = SyntaxTree(
+                depth=tree.depth + 1,
                 line_num=0,
                 tokens=chn,
                 parent=tree,
-                is_abstract=True)
+                is_abstract=True,
+            )
             tree.add_leaf(_tree)
             _reshape_tree(_tree, config)
 
     for sbg in siblings:
         if sbg:
-            _tree: SyntaxTree = SyntaxTree(
+            _tree = SyntaxTree(
                 depth=tree.depth,
                 line_num=0,
                 tokens=sbg,
                 parent=tree.parent,
-                is_abstract=True)
+                is_abstract=True,
+            )
+            assert tree.parent
             tree.parent.add_leaf(_tree)
             _reshape_tree(_tree, config)
 
 
-def _split_tokens(tree: SyntaxTree) -> Tuple[List[Token], List[List[Token]], List[Token]]:
+def _split_tokens(
+    tree: SyntaxTree,
+) -> Tuple[List[Token], List[List[Token]], List[Token]]:
     """
 
     Args:
@@ -130,17 +143,18 @@ def _split_tokens(tree: SyntaxTree) -> Tuple[List[Token], List[List[Token]], Lis
 
     if tokens[0].kind in [Token.KEYWORD, Token.FUNCTION]:
         return spt.KeywordSplitter.split(tokens, tree)
-    elif tokens[0].kind == Token.COMMA:
+    if tokens[0].kind == Token.COMMA:
         return spt.CommaSplitter.split(tokens, tree)
-    elif tokens[0].kind == Token.COMMENT:
+    if tokens[0].kind == Token.COMMENT:
         return tokens[0:1], [], tokens[1:]
-    elif tokens[0].kind == Token.IDENTIFIER:
+    if tokens[0].kind == Token.IDENTIFIER:
         return spt.IdentifierSplitter.split(tokens, tree)
-    elif tokens[0].kind in [Token.BRACKET_LEFT, Token.OPERATOR]:
+    if tokens[0].kind in [Token.BRACKET_LEFT, Token.OPERATOR]:
         return spt.Splitter.split_other(tokens)
-    elif tokens[0].kind == Token.BRACKET_RIGHT:
+    if tokens[0].kind == Token.BRACKET_RIGHT:
         return spt.RightBrackerSplitter.split(tokens, tree)
-    # ignores this case because this format method applies to abstract tree excluding whitespaces.
+    # ignores this case because this format method applies to abstract tree
+    # excluding whitespaces.
     # elif token.WHITESPACE:
 
     return tokens[0:1], [], tokens[1:]

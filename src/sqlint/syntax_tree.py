@@ -19,26 +19,19 @@ class Node:
     @line_num.setter
     def line_num(self, value: int):
         if value < 0:
-            raise ValueError(f'line_num must be ≧ 0, but {value}')
+            raise ValueError(f"line_num must be ≧ 0, but {value}")
         self._line_num = value
 
     @property
-    def tokens(self) -> List[Token]:
-        return self._tokens
-
-    @ tokens.setter
-    def tokens(self, value):
-        self._tokens = value
-
-    @property
     def text(self):
-        return ''.join([x.word for x in self.tokens])
+        return "".join([x.word for x in self.tokens])
 
     @property
     def indent(self):
         """Returns indent size
 
-        If this is a blank line or whitespaces does not exist at head of line, returns 0.
+        If this is a blank line or whitespaces does not exist at head of line,
+        returns 0.
 
         Returns:
             indent size
@@ -56,7 +49,7 @@ class Node:
         return len(self.tokens)
 
     def __str__(self):
-        return ' '.join([str(tkn) for tkn in self.tokens])
+        return " ".join([str(tkn) for tkn in self.tokens])
 
     def get_position(self, index: int):
         """Returns length of texts before Nth token.
@@ -68,7 +61,7 @@ class Node:
             length of texts
         """
         index = max(index, 0)
-        return sum([len(token) for token in self.tokens[0: index]])+1
+        return sum([len(token) for token in self.tokens[0:index]]) + 1
 
     def append(self, token: Token):
         self.tokens.append(token)
@@ -79,10 +72,10 @@ class Node:
     def insert(self, index: int, token: Token):
         self.tokens.insert(index, token)
 
-    def trip_kind(self, *args) -> 'Node':
+    def trip_kind(self, *args) -> "Node":
         return self.ltrip_kind(*args).rtrip_kind(*args)
 
-    def ltrip_kind(self, *args) -> 'Node':
+    def ltrip_kind(self, *args) -> "Node":
         """
 
         Args:
@@ -93,17 +86,17 @@ class Node:
         """
 
         cut = -1
-        for i in range(len(self.tokens)):
+        for i, token in enumerate(self.tokens):
             for token_kind in args:
-                if self.tokens[i].kind == token_kind:
+                if token.kind == token_kind:
                     cut = i
                     break
             if cut != i:
                 break
 
-        return Node(line_num=self.line_num, tokens=self.tokens[cut+1:])
+        return Node(line_num=self.line_num, tokens=self.tokens[cut + 1 :])
 
-    def rtrip_kind(self, *args) -> 'Node':
+    def rtrip_kind(self, *args) -> "Node":
         """
 
         Args:
@@ -122,16 +115,18 @@ class Node:
             if cut != i:
                 break
 
-        return Node(line_num=self.line_num, tokens=self.tokens[0: cut])
+        return Node(line_num=self.line_num, tokens=self.tokens[0:cut])
 
 
 class SyntaxTree:
-    def __init__(self,
-                 depth: int,
-                 line_num: int,
-                 tokens: List[Token] = None,
-                 parent: Optional['SyntaxTree'] = None,
-                 is_abstract: bool = False):
+    def __init__(
+        self,
+        depth: int,
+        line_num: int,
+        tokens: List[Token] = None,
+        parent: Optional["SyntaxTree"] = None,
+        is_abstract: bool = False,
+    ):
         """
 
         Args:
@@ -146,9 +141,9 @@ class SyntaxTree:
 
         """
 
-        self.depth: int = depth
-        self.leaves: List[SyntaxTree] = list()
-        self.parent: Optional['SyntaxTree'] = parent
+        self._depth = depth
+        self.leaves: List[SyntaxTree] = []
+        self.parent: Optional["SyntaxTree"] = parent
         self.node: Node = Node(line_num=line_num, tokens=tokens)
         self.is_abstract: bool = is_abstract
 
@@ -156,47 +151,23 @@ class SyntaxTree:
     def depth(self) -> int:
         return self._depth
 
-    @property
-    def parent(self) -> Optional['SyntaxTree']:
-        return self._parent
-
-    @property
-    def leaves(self) -> List['SyntaxTree']:
-        return self._leaves
-
-    @property
-    def node(self) -> Node:
-        return self._node
+    @depth.setter
+    def depth(self, value: int) -> None:
+        if value < 0:
+            raise ValueError(f"depth must be ≧ 0, but {value}")
+        self._depth = value
 
     @property
     def line_num(self) -> int:
-        return self._node.line_num
+        return self.node.line_num
 
     @property
     def tokens(self) -> List[Token]:
-        return self._node.tokens
+        return self.node.tokens
 
-    @depth.setter
-    def depth(self, value: int):
-        if value < 0:
-            raise ValueError(f'depth must be ≧ 0, but {value}')
-        self._depth = value
-
-    @parent.setter
-    def parent(self, value: Optional['SyntaxTree']):
-        self._parent = value
-
-    @leaves.setter
-    def leaves(self, value):
-        self._leaves = value
-
-    @node.setter
-    def node(self, value: Node):
-        self._node = value
-
-    @ tokens.setter
-    def tokens(self, value):
-        self._node._tokens = value
+    @tokens.setter
+    def tokens(self, value: List[Token]) -> None:
+        self.node.tokens = value
 
     @property
     def text(self):
@@ -206,7 +177,8 @@ class SyntaxTree:
     def indent(self):
         """Returns indent size
 
-        If this is a blank line or whitespaces does not exist at head of line, returns 0.
+        If this is a blank line or whitespaces does not exist at head of line,
+        returns 0.
 
         Returns:
             indent size
@@ -215,13 +187,16 @@ class SyntaxTree:
         return self.node.indent
 
     @classmethod
-    def sqlptree(cls, sql: str, is_abstract: bool = False, sql_type: str = 'StandardSQL') -> 'SyntaxTree':
+    def sqlptree(
+        cls, sql: str, is_abstract: bool = False, sql_type: str = "StandardSQL"
+    ) -> "SyntaxTree":
         """Returns SyntaxTree by parsing sql statement.
 
         Args:
             sql: sql statemtnt
             is_abstract: If this is True, this tree is constructed abstractly.
-                          Abstract tree ignores whitespaces, comments and blank lines.
+                          Abstract tree ignores whitespaces, comments and blank
+                          lines.
             sql_type: target sql type (StandardSQL only now)
 
         Returns:
@@ -229,8 +204,11 @@ class SyntaxTree:
         """
 
         # TODO: deals with other sql type.
-        if sql_type != 'StandardSQL':
-            raise NotImplementedError(f'this linter can parses only "StandardSQL" right now, but {sql_type}')
+        if sql_type != "StandardSQL":
+            raise NotImplementedError(
+                'this linter can parses only "StandardSQL" right now, '
+                f"but {sql_type}"
+            )
 
         token_list: List[List[Token]] = parse_sql(sql)
 
@@ -259,17 +237,18 @@ class SyntaxTree:
                 line_num=line_num + 1,
                 tokens=tokens,
                 parent=parent_vertex,
-                is_abstract=is_abstract)
+                is_abstract=is_abstract,
+            )
             parent_vertex.add_leaf(_tree)
             parent_vertex = _tree
 
         return result
 
     @staticmethod
-    def _ignore_token(tokens: List[Token]):
+    def _ignore_token(tokens: List[Token]) -> List[Token]:
         """Returns tokens exclueded ones in abstract tree"""
 
-        result = []
+        result: List[Token] = []
         ignore_kinds = [Token.WHITESPACE]
 
         if len(tokens) == 0:
@@ -291,30 +270,30 @@ class SyntaxTree:
         return SyntaxTree._sqlftree(self)
 
     @staticmethod
-    def _sqlftree(tree: 'SyntaxTree') -> str:
+    def _sqlftree(tree: "SyntaxTree") -> str:
         """Returns sql statement
 
         Returns:
             sql statement
         """
 
-        result = ''
+        result = ""
         for leaf in tree.leaves:
             if len(result) == 0:
                 result = leaf.text
             else:
-                result = f'{result}\n{leaf.text}'
+                result = f"{result}\n{leaf.text}"
 
             appendix = SyntaxTree._sqlftree(leaf)
             if len(appendix) > 0:
-                result = f'{result}\n{appendix}'
+                result = f"{result}\n{appendix}"
 
         return result
 
-    def add_leaf(self, leaf: 'SyntaxTree'):
+    def add_leaf(self, leaf: "SyntaxTree"):
         self.leaves.append(leaf)
 
-    def insert_leaf(self, index: int, leaf: 'SyntaxTree'):
+    def insert_leaf(self, index: int, leaf: "SyntaxTree"):
         self.leaves.insert(index, leaf)
 
     def get_position(self, index: int):
