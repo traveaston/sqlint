@@ -39,11 +39,11 @@ def main(files, config_file, is_format):
     # constructs syntax tree in each files
     for f in files:
         if not os.path.exists(f):
-            logger.warning(f'file is not found: {f}')
+            logger.warning("file is not found: %s", f)
             continue
 
         if os.path.isdir(f):
-            logger.warning(f'{f} is a directory')
+            logger.warning("%s is a directory", f)
             continue
 
         with open(f, 'r') as fp:
@@ -60,7 +60,7 @@ def main(files, config_file, is_format):
         else:
             tree.sqlftree()
             for v in sorted(check_tree(tree, config)):
-                logger.info('{} {}'.format(file, v))
+                logger.info("%s %s", file, v)
 
 
 if __name__ == '__main__':
