@@ -1,16 +1,16 @@
 import logging
 from abc import ABCMeta, abstractmethod
-from typing import List, TypeVar, Tuple
+from typing import List, TypeVar, Tuple, Generic
 
 from sqlint.parser import Token
 from sqlint.syntax_tree import SyntaxTree
 
-T = TypeVar("T")
+T = TypeVar("T", bound="Splitter")
 
 logger = logging.getLogger(__name__)
 
 
-class Splitter(metaclass=ABCMeta):
+class Splitter(Generic[T], metaclass=ABCMeta):
     @abstractmethod
     def split(
         self, tokens: List[T], tree: SyntaxTree

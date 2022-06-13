@@ -230,6 +230,7 @@ class SyntaxTree:
 
             # check whether parent_node is root node
             while indent <= parent_vertex.indent and 0 < parent_vertex.depth:
+                assert parent_vertex.parent
                 parent_vertex = parent_vertex.parent
 
             _tree = SyntaxTree(
