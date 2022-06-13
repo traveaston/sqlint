@@ -287,8 +287,8 @@ class KeywordSplitter(Splitter):
             if token in stoppers and group_count == 1 and bracket_count == 0:
                 if len(tokens) >= 3 and tokens[2].kind == Token.BRACKET_LEFT:
                     return tokens[0:3], [tokens[3 : idx + 1]], tokens[idx + 1 :]
-                else:
-                    return tokens[0:2], [tokens[2 : idx + 1]], tokens[idx + 1 :]
+
+                return tokens[0:2], [tokens[2 : idx + 1]], tokens[idx + 1 :]
 
         return tokens[0:2], [tokens[2:]], []
 
@@ -320,8 +320,8 @@ class KeywordSplitter(Splitter):
             if token in stoppers and order_count == 1 and bracket_count == 0:
                 if len(tokens) >= 3 and tokens[2].kind == Token.BRACKET_LEFT:
                     return tokens[0:3], [tokens[3 : idx + 1]], tokens[idx + 1 :]
-                else:
-                    return tokens[0:2], [tokens[2 : idx + 1]], tokens[idx + 1 :]
+
+                return tokens[0:2], [tokens[2 : idx + 1]], tokens[idx + 1 :]
 
         return tokens[0:2], [tokens[2:]], []
 
