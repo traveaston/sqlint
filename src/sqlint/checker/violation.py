@@ -1,5 +1,5 @@
-from typing import Dict
 from enum import Enum
+from typing import Dict
 
 from sqlint.parser import Token
 from sqlint.syntax_tree import SyntaxTree

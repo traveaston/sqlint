@@ -1,7 +1,8 @@
-import click
 import logging
 import os
 from typing import Dict
+
+import click
 
 from .checker import check as check_tree
 from .config import Config

@@ -1,9 +1,9 @@
 import re
 
 from .keywords import (
-    RESERVED_KEYWORDS,
-    RESERVED_FUNCTIONS,
     BINARY_OPERATORS_ESCAPED,
+    RESERVED_FUNCTIONS,
+    RESERVED_KEYWORDS,
 )
 
 # regex patterns

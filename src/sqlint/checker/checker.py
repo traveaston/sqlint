@@ -1,12 +1,13 @@
 from abc import ABCMeta, abstractmethod
 from typing import Dict, List, Tuple
 
-from . import violation
-from .violation import Violation
 from sqlint.config import Config
-from sqlint.syntax_tree import SyntaxTree, Node
 from sqlint.parser import Token
 from sqlint.parser.keywords import format as format_keyword
+from sqlint.syntax_tree import Node, SyntaxTree
+
+from . import violation
+from .violation import Violation
 
 
 class Checker(metaclass=ABCMeta):

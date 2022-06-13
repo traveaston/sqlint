@@ -1,9 +1,10 @@
 from typing import List
 
+from sqlint.config import Config
+from sqlint.syntax_tree import SyntaxTree
+
 from . import checker as chk
 from .violation import Violation
-from sqlint.syntax_tree import SyntaxTree
-from sqlint.config import Config
 
 
 def check(tree: SyntaxTree, config: Config) -> List[Violation]:

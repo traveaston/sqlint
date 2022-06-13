@@ -1,10 +1,10 @@
 import logging
 
-from .syntax_tree import SyntaxTree
-from .config import Config
-from .parser import parse as parse_sql
 from .checker import check as check_sql
+from .config import Config
 from .formatter import format as format_sql
+from .parser import parse as parse_sql
+from .syntax_tree import SyntaxTree
 
 __version__ = "0.2.4"
 

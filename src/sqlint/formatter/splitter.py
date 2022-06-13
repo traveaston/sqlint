@@ -1,6 +1,6 @@
 import logging
 from abc import ABCMeta, abstractmethod
-from typing import List, TypeVar, Tuple, Generic
+from typing import Generic, List, Tuple, TypeVar
 
 from sqlint.parser import Token
 from sqlint.syntax_tree import SyntaxTree

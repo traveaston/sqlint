@@ -1,11 +1,12 @@
 import logging
 from typing import List, Tuple
 
-from . import splitter as spt
-from . import formatter as fmt
 from sqlint.config import Config
 from sqlint.parser import Token
 from sqlint.syntax_tree import SyntaxTree
+
+from . import formatter as fmt
+from . import splitter as spt
 
 logger = logging.getLogger(__name__)
 
