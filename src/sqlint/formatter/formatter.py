@@ -266,7 +266,9 @@ class BlankLineFormatter(Formatter):
                         and len(tokens) == 2
                     )
                 ):
-                    tree.insert_leaf(index + 1, SyntaxTree(depth=1, line_num=0))
+                    tree.insert_leaf(
+                        index + 1, SyntaxTree(depth=1, line_num=0)
+                    )
 
             except IndexError:
                 # tokens index out of range

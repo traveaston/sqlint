@@ -12,12 +12,22 @@ from .syntax_tree import SyntaxTree
 logger = logging.getLogger(__name__)
 
 
-@click.command(context_settings={'ignore_unknown_options': True})
-@click.argument('files', nargs=-1, type=click.Path())
-@click.option('--config', '-c', 'config_file',
-              type=click.Path(),
-              help='Path to the config file that will be the authoritative config source.')
-@click.option('--format', '-f', 'is_format', is_flag=True, help='Prints formatted sql and exist')
+@click.command(context_settings={"ignore_unknown_options": True})
+@click.argument("files", nargs=-1, type=click.Path())
+@click.option(
+    "--config",
+    "-c",
+    "config_file",
+    type=click.Path(),
+    help="Path to the config file that will be the authoritative config source.",
+)
+@click.option(
+    "--format",
+    "-f",
+    "is_format",
+    is_flag=True,
+    help="Prints formatted sql and exist",
+)
 def main(files, config_file, is_format):
     """
 
@@ -46,7 +56,7 @@ def main(files, config_file, is_format):
             logger.warning("%s is a directory", f)
             continue
 
-        with open(f, 'r') as fp:
+        with open(f, "r") as fp:
             if is_format:
                 # constructs syntax tree
                 trees[f] = SyntaxTree.sqlptree(fp.read(), is_abstract=True)
@@ -63,5 +73,5 @@ def main(files, config_file, is_format):
                 logger.info("%s %s", file, v)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

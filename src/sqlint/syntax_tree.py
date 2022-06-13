@@ -213,7 +213,9 @@ class SyntaxTree:
         token_list: List[List[Token]] = parse_sql(sql)
 
         # creates empty syntax tree as guard
-        parent_vertex = SyntaxTree(depth=0, line_num=0, is_abstract=is_abstract)
+        parent_vertex = SyntaxTree(
+            depth=0, line_num=0, is_abstract=is_abstract
+        )
         result = parent_vertex
 
         for line_num, tokens in enumerate(token_list):

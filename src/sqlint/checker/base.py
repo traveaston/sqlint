@@ -32,7 +32,7 @@ def check(tree: SyntaxTree, config: Config) -> List[Violation]:
         # Check about join context
         chk.JoinChecker,
         # Check whether line-breaking before or after specified keywords.
-        chk.LineChecker
+        chk.LineChecker,
     ]
 
     for checker in checker_list:

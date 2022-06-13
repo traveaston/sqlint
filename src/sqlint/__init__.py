@@ -6,12 +6,12 @@ from .parser import parse as parse_sql
 from .checker import check as check_sql
 from .formatter import format as format_sql
 
-__version__ = '0.2.4'
+__version__ = "0.2.4"
 
 __all__ = [
-    'parse',
-    'check',
-    'format',
+    "parse",
+    "check",
+    "format",
 ]
 
 # setting logger
@@ -20,9 +20,9 @@ handler = logging.StreamHandler()
 LOG_LEVEL = logging.INFO
 
 if LOG_LEVEL == logging.INFO:
-    formatter = logging.Formatter('%(message)s')
+    formatter = logging.Formatter("%(message)s")
 else:
-    formatter = logging.Formatter('[%(levelname)s]: %(message)s')
+    formatter = logging.Formatter("[%(levelname)s]: %(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)

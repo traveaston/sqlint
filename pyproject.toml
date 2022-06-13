@@ -1,0 +1,50 @@
+[tool.poetry]
+authors = ["shigeru0215"]
+classifiers = [
+  'Development Status :: 3 - Alpha',
+  'Environment :: Console',
+  'Intended Audience :: Developers',
+  'License :: OSI Approved :: MIT License',
+  'Programming Language :: Python',
+  'Programming Language :: Python :: 3',
+  'Programming Language :: Python :: 3.6',
+  'Programming Language :: Python :: 3.7',
+  'Topic :: Software Development :: Quality Assurance',
+  'Topic :: Text Processing :: General',
+]
+description = "Simple Sql Linter"
+include = []
+license = "MIT"
+name = "sqlint"
+readme = "README.rst"
+version = ""
+
+[tool.poetry.dependencies]
+click = "^7.0"
+configparser = "^4.0"
+
+[tool.poetry.dev-dependencies]
+
+[tool.poetry.extras]
+
+[tool.poetry.scripts]
+webmon2 = "sqlint.__main__:main"
+
+[tool.black]
+line-length = 79
+
+[tool.isort]
+line_length = 79
+multi_line_output = 3
+profile = "black"
+
+[tool.bandit]
+# skips = ["B101", "B410", "B303", "B110", "B404", "B311", "B405", "B201"]
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0"]
+
+[mypy]
+python_version = 3.7
+strict = true

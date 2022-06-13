@@ -36,11 +36,13 @@ class IndentStepsChecker(Checker):
                     tree=leaf,
                     index=0,
                     expected=indent_steps,
-                    actual=leaf.indent)
+                    actual=leaf.indent,
+                )
                 violation_list.append(v)
 
             violation_list.extend(
-                IndentStepsChecker._check(leaf, indent_steps))
+                IndentStepsChecker._check(leaf, indent_steps)
+            )
 
         return violation_list
 
@@ -53,6 +55,7 @@ class KeywordStyleChecker(Checker):
         - upper-all: e.g) SELECT
         - upper-head: e.g) Select
     """
+
     @staticmethod
     def check(tree: SyntaxTree, config: Config) -> List[Violation]:
         # TODO: Enable users to ignore violation cases by config.
@@ -73,22 +76,26 @@ class KeywordStyleChecker(Checker):
                 word: str = token.word
                 expected: str = format_keyword(word, keyword_style)
                 if word != expected:
-                    params = {'style': keyword_style, 'actual': word, 'expected': expected}
+                    params = {
+                        "style": keyword_style,
+                        "actual": word,
+                        "expected": expected,
+                    }
 
                     v = violation.KeywordStyleViolation(
-                        tree=leaf,
-                        index=idx,
-                        **params)
+                        tree=leaf, index=idx, **params
+                    )
                     violation_list.append(v)
 
             violation_list.extend(
-                KeywordStyleChecker._check(leaf, keyword_style))
+                KeywordStyleChecker._check(leaf, keyword_style)
+            )
 
         return violation_list
 
 
 class CommaChecker(Checker):
-    """ Checks violations about comma.
+    """Checks violations about comma.
 
     1. Whether comma is head or end of a line.(default: head)
     """
@@ -107,46 +114,61 @@ class CommaChecker(Checker):
         return result
 
     @staticmethod
-    def _check_position(tree: SyntaxTree, comma_position: str) -> List[Violation]:
+    def _check_position(
+        tree: SyntaxTree, comma_position: str
+    ) -> List[Violation]:
         violation_list: List[Violation] = list()
 
-        lb = Token('(', Token.BRACKET_LEFT)
-        rb = Token(')', Token.BRACKET_RIGHT)
+        lb = Token("(", Token.BRACKET_LEFT)
+        rb = Token(")", Token.BRACKET_RIGHT)
 
         for leaf in tree.leaves:
             # removes whitespaces and comments at head and end of line.
-            ltripped_node: Node = leaf.node.ltrip_kind(Token.WHITESPACE, Token.COMMENT)
+            ltripped_node: Node = leaf.node.ltrip_kind(
+                Token.WHITESPACE, Token.COMMENT
+            )
             lindex = len(leaf.node) - len(ltripped_node)
 
-            tokens = ltripped_node.rtrip_kind(Token.WHITESPACE, Token.COMMENT).tokens
-            comma_indexes = [i for i, x in enumerate(tokens) if x == ',']
+            tokens = ltripped_node.rtrip_kind(
+                Token.WHITESPACE, Token.COMMENT
+            ).tokens
+            comma_indexes = [i for i, x in enumerate(tokens) if x == ","]
 
-            if comma_position == 'head':
+            if comma_position == "head":
                 comma_indexes = [i for i in comma_indexes if i != 0]
-            elif comma_position == 'end':
-                comma_indexes = [i for i in comma_indexes if i != len(tokens)-1]
+            elif comma_position == "end":
+                comma_indexes = [
+                    i for i in comma_indexes if i != len(tokens) - 1
+                ]
 
             for idx in comma_indexes:
                 # If a comma is in brackets, it is appropriate not to break a line at the comma.
                 # Determines that by counting left- and right- brackets at left-right-side.
-                is_open_bracket = 0 < (tokens[0:idx].count(lb) - tokens[0:idx].count(rb))
-                is_close_bracket = 0 < (tokens[idx+1:].count(rb) - tokens[idx+1:].count(lb))
+                is_open_bracket = 0 < (
+                    tokens[0:idx].count(lb) - tokens[0:idx].count(rb)
+                )
+                is_close_bracket = 0 < (
+                    tokens[idx + 1 :].count(rb) - tokens[idx + 1 :].count(lb)
+                )
 
                 if not is_open_bracket or not is_close_bracket:
                     violation_list.append(
                         violation.CommaPositionViolation(
                             tree=leaf,
-                            index=lindex+idx,
-                            comma_position=comma_position))
+                            index=lindex + idx,
+                            comma_position=comma_position,
+                        )
+                    )
 
             violation_list.extend(
-                CommaChecker._check_position(leaf, comma_position))
+                CommaChecker._check_position(leaf, comma_position)
+            )
 
         return violation_list
 
 
 class WhitespaceChecker(Checker):
-    """ Checks violations about whitespace.
+    """Checks violations about whitespace.
 
     1. Whether multiple whitespaces exist.
     2. Whether a Whitespace is after a comma and not before it.
@@ -189,7 +211,10 @@ class WhitespaceChecker(Checker):
                     continue
 
                 # 2 spaces before comment is valid
-                if length == 2 and (idx+1 < len(tokens) and tokens[idx+1].kind == Token.COMMENT):
+                if length == 2 and (
+                    idx + 1 < len(tokens)
+                    and tokens[idx + 1].kind == Token.COMMENT
+                ):
                     continue
 
                 if length > 1:
@@ -212,28 +237,28 @@ class WhitespaceChecker(Checker):
 
                 # Checks that a whitespace does not exist before comma.
                 # However, when comma is at head of line, it is allowed that whitespace is before.
-                if idx >= 2 and leaf.tokens[idx-1].kind == Token.WHITESPACE:
-                    params = {'token': Token.COMMA,
-                              'position': 'before'}
+                if idx >= 2 and leaf.tokens[idx - 1].kind == Token.WHITESPACE:
+                    params = {"token": Token.COMMA, "position": "before"}
                     violation_list.append(
                         violation.WhitespaceViolation(
-                            tree=leaf,
-                            index=idx,
-                            **params))
+                            tree=leaf, index=idx, **params
+                        )
+                    )
 
                 # checks whether a whitespace exists after comma.
-                if leaf.tokens[idx+1].kind != Token.WHITESPACE:
-                    params = {'token': Token.COMMA,
-                              'position': 'after',
-                              'target': f'{token.word}{leaf.tokens[idx+1].word}'}
+                if leaf.tokens[idx + 1].kind != Token.WHITESPACE:
+                    params = {
+                        "token": Token.COMMA,
+                        "position": "after",
+                        "target": f"{token.word}{leaf.tokens[idx+1].word}",
+                    }
                     violation_list.append(
                         violation.WhitespaceViolation(
-                            tree=leaf,
-                            index=idx,
-                            **params))
+                            tree=leaf, index=idx, **params
+                        )
+                    )
 
-            violation_list.extend(
-                WhitespaceChecker._check_comma(leaf))
+            violation_list.extend(WhitespaceChecker._check_comma(leaf))
 
         return violation_list
 
@@ -245,29 +270,37 @@ class WhitespaceChecker(Checker):
             # Comma at end of line dose not need to checked
             for idx, token in enumerate(leaf.tokens[:-1]):
                 # Checks whether a whitespace does not exist after left-bracket "( ".
-                if token.kind == Token.BRACKET_LEFT \
-                        and leaf.tokens[idx+1].kind == Token.WHITESPACE:
-                    params = {'token': Token.BRACKET_LEFT,
-                              'position': 'after',
-                              'target': f'{token.word}{leaf.tokens[idx+1].word}'}
-                    violation_list.append(
-                        violation.WhitespaceViolation(tree=leaf, index=idx, **params))
-
-                # Checks whether a whitespace does not exist before right-bracket " )".
-                if token.kind == Token.BRACKET_RIGHT \
-                        and (idx >= 2 and leaf.tokens[idx-1].kind == Token.WHITESPACE):
+                if (
+                    token.kind == Token.BRACKET_LEFT
+                    and leaf.tokens[idx + 1].kind == Token.WHITESPACE
+                ):
                     params = {
-                        'token': Token.BRACKET_RIGHT,
-                        'position': 'before',
-                        'target': f'{leaf.tokens[idx-1].word}{token.word}'}
+                        "token": Token.BRACKET_LEFT,
+                        "position": "after",
+                        "target": f"{token.word}{leaf.tokens[idx+1].word}",
+                    }
                     violation_list.append(
                         violation.WhitespaceViolation(
-                            tree=leaf,
-                            index=idx,
-                            **params))
+                            tree=leaf, index=idx, **params
+                        )
+                    )
 
-            violation_list.extend(
-                WhitespaceChecker._check_bracket(leaf))
+                # Checks whether a whitespace does not exist before right-bracket " )".
+                if token.kind == Token.BRACKET_RIGHT and (
+                    idx >= 2 and leaf.tokens[idx - 1].kind == Token.WHITESPACE
+                ):
+                    params = {
+                        "token": Token.BRACKET_RIGHT,
+                        "position": "before",
+                        "target": f"{leaf.tokens[idx-1].word}{token.word}",
+                    }
+                    violation_list.append(
+                        violation.WhitespaceViolation(
+                            tree=leaf, index=idx, **params
+                        )
+                    )
+
+            violation_list.extend(WhitespaceChecker._check_bracket(leaf))
 
         return violation_list
 
@@ -282,31 +315,38 @@ class WhitespaceChecker(Checker):
                     continue
 
                 # Checks whether a whitespace exists before operator.
-                if idx >= 2 and leaf.tokens[idx-1].kind != Token.WHITESPACE:
+                if idx >= 2 and leaf.tokens[idx - 1].kind != Token.WHITESPACE:
                     params = {
-                        'token': Token.OPERATOR,
-                        'position': 'before',
-                        'target': f'{leaf.tokens[idx-1].word}{token.word}'}
+                        "token": Token.OPERATOR,
+                        "position": "before",
+                        "target": f"{leaf.tokens[idx-1].word}{token.word}",
+                    }
                     violation_list.append(
-                        violation.WhitespaceViolation(tree=leaf, index=idx, **params))
+                        violation.WhitespaceViolation(
+                            tree=leaf, index=idx, **params
+                        )
+                    )
 
                 # Checks whether a whitespace exists after operator.
                 if leaf.tokens[idx + 1].kind != Token.WHITESPACE:
                     params = {
-                        'token': Token.OPERATOR,
-                        'position': 'after',
-                        'target': f'{token.word}{leaf.tokens[idx + 1].word}'}
+                        "token": Token.OPERATOR,
+                        "position": "after",
+                        "target": f"{token.word}{leaf.tokens[idx + 1].word}",
+                    }
                     violation_list.append(
-                        violation.WhitespaceViolation(tree=leaf, index=idx, **params))
+                        violation.WhitespaceViolation(
+                            tree=leaf, index=idx, **params
+                        )
+                    )
 
-            violation_list.extend(
-                WhitespaceChecker._check_operator(leaf))
+            violation_list.extend(WhitespaceChecker._check_operator(leaf))
 
         return violation_list
 
 
 class JoinChecker(Checker):
-    """ Checks violations about join context.
+    """Checks violations about join context.
 
     1. Whether join context and table name are same line.
     2. Whether join contexts are described fully, for example [inner join], [left outer join], [right outer join]
@@ -323,17 +363,17 @@ class JoinChecker(Checker):
 
         # 2. Whether join contexts are described fully, for example [inner join], [left outer join], [right outer join]
         expected_kvs = {
-            'LEFT': ['LEFT', 'OUTER', 'JOIN'],
-            'RIGHT': ['RIGHT', 'OUTER', 'JOIN'],
-            'FULL': ['FULL', 'OUTER', 'JOIN'],
-            'OUTER': ['[LEFT|RIGHT|FULL]', 'OUTER', 'JOIN'],
-            'INNER': ['INNER', 'JOIN'],
-            'CROSS': ['CROSS', 'JOIN'],
+            "LEFT": ["LEFT", "OUTER", "JOIN"],
+            "RIGHT": ["RIGHT", "OUTER", "JOIN"],
+            "FULL": ["FULL", "OUTER", "JOIN"],
+            "OUTER": ["[LEFT|RIGHT|FULL]", "OUTER", "JOIN"],
+            "INNER": ["INNER", "JOIN"],
+            "CROSS": ["CROSS", "JOIN"],
         }
         expected_list = {}
         for k, vs in expected_kvs.items():
             _key = JoinChecker._format_str(k)
-            _value = ' '.join([JoinChecker._format_str(v) for v in vs])
+            _value = " ".join([JoinChecker._format_str(v) for v in vs])
             expected_list[_key] = _value
 
         result.extend(JoinChecker._check_context(tree, expected_list))
@@ -346,17 +386,20 @@ class JoinChecker(Checker):
 
     @staticmethod
     def _check_table_existance(tree: SyntaxTree) -> List[Violation]:
-        """Checks the token next to 'Join' is identifier(maybe table_name) or SubQuery """
+        """Checks the token next to 'Join' is identifier(maybe table_name) or SubQuery"""
         violation_list: List[Violation] = list()
 
         for leaf in tree.leaves:
             for idx, token in enumerate(leaf.tokens):
                 # ignores token except join
-                if token.word.upper() != 'JOIN':
+                if token.word.upper() != "JOIN":
                     continue
 
                 # ignores the token next to 'JOIN' is identifier which may be table.
-                if idx <= len(leaf.tokens)-2 and leaf.tokens[idx+2].kind == Token.IDENTIFIER:
+                if (
+                    idx <= len(leaf.tokens) - 2
+                    and leaf.tokens[idx + 2].kind == Token.IDENTIFIER
+                ):
                     continue
 
                 # TODO: Checks below
@@ -383,13 +426,19 @@ class JoinChecker(Checker):
         return violation_list
 
     @staticmethod
-    def _check_context(tree: SyntaxTree, expected_list: Dict[str, str]) -> List[Violation]:
-        """Checks whether join are described fully, for example [inner join], [left outer join], [right outer join] """
+    def _check_context(
+        tree: SyntaxTree, expected_list: Dict[str, str]
+    ) -> List[Violation]:
+        """Checks whether join are described fully, for example [inner join], [left outer join], [right outer join]"""
         violation_list: List[Violation] = list()
 
         # TODO: too deeply nest and complex code
         for leaf in tree.leaves:
-            join_indexes = [i for i, x in enumerate(leaf.tokens) if x.word.upper() == 'JOIN']
+            join_indexes = [
+                i
+                for i, x in enumerate(leaf.tokens)
+                if x.word.upper() == "JOIN"
+            ]
 
             for idx in join_indexes:
                 token = leaf.tokens[idx]
@@ -397,7 +446,7 @@ class JoinChecker(Checker):
                 # concat keyword concerned with join
                 join_contexts = [token.word]
                 # only 'JOIN' is expected INNER JOIN
-                expected: str = expected_list[JoinChecker._format_str('INNER')]
+                expected: str = expected_list[JoinChecker._format_str("INNER")]
                 for tk in reversed(leaf.tokens[:idx]):
                     if tk.kind in [Token.WHITESPACE, Token.COMMENT]:
                         continue
@@ -409,13 +458,19 @@ class JoinChecker(Checker):
                     else:
                         break
 
-                join_context_str = JoinChecker._format_str(' '.join(join_contexts))
+                join_context_str = JoinChecker._format_str(
+                    " ".join(join_contexts)
+                )
                 if join_context_str not in expected_list.values():
-                    params = {'actual': join_context_str, 'expected': expected}
-                    v = violation.JoinContextOmitViolation(tree=leaf, index=idx, **params)
+                    params = {"actual": join_context_str, "expected": expected}
+                    v = violation.JoinContextOmitViolation(
+                        tree=leaf, index=idx, **params
+                    )
                     violation_list.append(v)
 
-            violation_list.extend(JoinChecker._check_context(leaf, expected_list))
+            violation_list.extend(
+                JoinChecker._check_context(leaf, expected_list)
+            )
 
         return violation_list
 
@@ -444,9 +499,13 @@ class LineChecker(Checker):
         result: List[Violation] = []
 
         # 1. Checks whether two or more blank lines exist.
-        v_list, blank_count, last_tree = LineChecker._check_blank_line(tree, blank_count=0)
+        v_list, blank_count, last_tree = LineChecker._check_blank_line(
+            tree, blank_count=0
+        )
         if blank_count >= 2:
-            v_list.append(violation.MultiBlankLineViolation(last_tree, index=0))
+            v_list.append(
+                violation.MultiBlankLineViolation(last_tree, index=0)
+            )
         result.extend(v_list)
 
         # 2. Checks whether breaking line after specified keywords.
@@ -455,26 +514,34 @@ class LineChecker(Checker):
         return result
 
     @staticmethod
-    def _check_blank_line(tree: SyntaxTree, blank_count: int) -> Tuple[List[Violation], int, SyntaxTree]:
+    def _check_blank_line(
+        tree: SyntaxTree, blank_count: int
+    ) -> Tuple[List[Violation], int, SyntaxTree]:
         violation_list: List[Violation] = []
         last_tree = tree
 
         for leaf in tree.leaves:
             count = len(leaf.node)
-            is_blank = (count == 0)
+            is_blank = count == 0
 
             if count == 1 and leaf.tokens[0].kind == Token.WHITESPACE:
-                violation_list.append(violation.OnlyWhitespaceViolation(tree=leaf, index=0))
+                violation_list.append(
+                    violation.OnlyWhitespaceViolation(tree=leaf, index=0)
+                )
 
             # If this line is not blank and 2 or more previous lines are blank, stack violation.
             if is_blank:
                 blank_count += 1
             else:
                 if blank_count >= 2:
-                    violation_list.append(violation.MultiBlankLineViolation(tree=leaf, index=0))
+                    violation_list.append(
+                        violation.MultiBlankLineViolation(tree=leaf, index=0)
+                    )
                 blank_count = 0
 
-            v_list, blank_count, last_tree = LineChecker._check_blank_line(leaf, blank_count)
+            v_list, blank_count, last_tree = LineChecker._check_blank_line(
+                leaf, blank_count
+            )
             violation_list.extend(v_list)
 
         return violation_list, blank_count, last_tree

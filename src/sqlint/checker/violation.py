@@ -17,7 +17,10 @@ class Code(Enum):
         "E202",
         "whitespace must be after comma: {target}",
     )
-    WHITESPACE_BEFORE_COMMA = ("E203", "whitespace must not be before comma: ,")
+    WHITESPACE_BEFORE_COMMA = (
+        "E203",
+        "whitespace must not be before comma: ,",
+    )
     WHITESPACE_AFTER_BRACKET = (
         "E204",
         "whitespace must not be after bracket: {target}",
@@ -109,7 +112,9 @@ class Violation:
     def __str__(self):
         _template = "(L{line}, {pos}): " + self.code.template
 
-        return _template.format(line=self.line_num, pos=self.pos, **self.params)
+        return _template.format(
+            line=self.line_num, pos=self.pos, **self.params
+        )
 
     def __lt__(self, other):
         if self.line_num == other.line_num:

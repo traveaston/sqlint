@@ -202,7 +202,11 @@ class CommaSplitter(Splitter):
                 bracket_count += -1 if token.kind == Token.BRACKET_RIGHT else 0
 
                 if bracket_count == 0:
-                    return tokens[0:4], [tokens[4 : idx + 4]], tokens[idx + 4 :]
+                    return (
+                        tokens[0:4],
+                        [tokens[4 : idx + 4]],
+                        tokens[idx + 4 :],
+                    )
 
             return tokens[0:1], [], tokens[1:]
 
@@ -286,7 +290,11 @@ class KeywordSplitter(Splitter):
 
             if token in stoppers and group_count == 1 and bracket_count == 0:
                 if len(tokens) >= 3 and tokens[2].kind == Token.BRACKET_LEFT:
-                    return tokens[0:3], [tokens[3 : idx + 1]], tokens[idx + 1 :]
+                    return (
+                        tokens[0:3],
+                        [tokens[3 : idx + 1]],
+                        tokens[idx + 1 :],
+                    )
 
                 return tokens[0:2], [tokens[2 : idx + 1]], tokens[idx + 1 :]
 
@@ -319,7 +327,11 @@ class KeywordSplitter(Splitter):
 
             if token in stoppers and order_count == 1 and bracket_count == 0:
                 if len(tokens) >= 3 and tokens[2].kind == Token.BRACKET_LEFT:
-                    return tokens[0:3], [tokens[3 : idx + 1]], tokens[idx + 1 :]
+                    return (
+                        tokens[0:3],
+                        [tokens[3 : idx + 1]],
+                        tokens[idx + 1 :],
+                    )
 
                 return tokens[0:2], [tokens[2 : idx + 1]], tokens[idx + 1 :]
 
@@ -495,9 +507,17 @@ class KeywordSplitter(Splitter):
 
             if token in stoppers and from_count == 1 and bracket_count == 0:
                 if tokens[1].kind == Token.BRACKET_LEFT:
-                    return tokens[0:2], [tokens[2 : idx + 1]], tokens[idx + 1 :]
+                    return (
+                        tokens[0:2],
+                        [tokens[2 : idx + 1]],
+                        tokens[idx + 1 :],
+                    )
                 else:
-                    return tokens[0:1], [tokens[1 : idx + 1]], tokens[idx + 1 :]
+                    return (
+                        tokens[0:1],
+                        [tokens[1 : idx + 1]],
+                        tokens[idx + 1 :],
+                    )
 
         return tokens[0:1], [tokens[1:]], []
 
