@@ -22,6 +22,7 @@ version = ""
 [tool.poetry.dependencies]
 click = "^7.0"
 configparser = "^4.0"
+python = "^3.7"
 
 [tool.poetry.dev-dependencies]
 

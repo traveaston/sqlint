@@ -1,4 +1,6 @@
-from typing import List, Optional
+from __future__ import annotations
+
+from typing import List, Optional, Generator
 
 from .parser import Token
 from .parser import parse as parse_sql
@@ -72,10 +74,10 @@ class Node:
     def insert(self, index: int, token: Token):
         self.tokens.insert(index, token)
 
-    def trip_kind(self, *args) -> "Node":
+    def trip_kind(self, *args) -> Node:
         return self.ltrip_kind(*args).rtrip_kind(*args)
 
-    def ltrip_kind(self, *args) -> "Node":
+    def ltrip_kind(self, *args) -> Node:
         """
 
         Args:
@@ -84,19 +86,16 @@ class Node:
         Returns:
 
         """
-
         cut = -1
-        for i, token in enumerate(self.tokens):
-            for token_kind in args:
-                if token.kind == token_kind:
-                    cut = i
-                    break
-            if cut != i:
+        for token in self.tokens:
+            if token.kind in args:
+                cut += 1
+            else:
                 break
 
         return Node(line_num=self.line_num, tokens=self.tokens[cut + 1 :])
 
-    def rtrip_kind(self, *args) -> "Node":
+    def rtrip_kind(self, *args) -> Node:
         """
 
         Args:
@@ -105,14 +104,11 @@ class Node:
         Returns:
 
         """
-
         cut = len(self.tokens)
-        for i in reversed(range(len(self.tokens))):
-            for token_kind in args:
-                if self.tokens[i].kind == token_kind:
-                    cut = i
-                    break
-            if cut != i:
+        for token in reversed(self.tokens):
+            if token.kind in args:
+                cut -= 1
+            else:
                 break
 
         return Node(line_num=self.line_num, tokens=self.tokens[0:cut])
@@ -124,7 +120,7 @@ class SyntaxTree:
         depth: int,
         line_num: int,
         tokens: List[Token] = None,
-        parent: Optional["SyntaxTree"] = None,
+        parent: Optional[SyntaxTree] = None,
         is_abstract: bool = False,
     ):
         """
@@ -143,7 +139,7 @@ class SyntaxTree:
 
         self._depth = depth
         self.leaves: List[SyntaxTree] = []
-        self.parent: Optional["SyntaxTree"] = parent
+        self.parent: Optional[SyntaxTree] = parent
         self.node: Node = Node(line_num=line_num, tokens=tokens)
         self.is_abstract: bool = is_abstract
 
@@ -227,7 +223,7 @@ class SyntaxTree:
 
             # if line is not blank, get indent size
             indent = 0
-            if len(tokens) > 0 and tokens[0].kind == Token.WHITESPACE:
+            if tokens and tokens[0].kind == Token.WHITESPACE:
                 indent = len(tokens[0].word)
 
             # check whether parent_node is root node
@@ -251,17 +247,12 @@ class SyntaxTree:
     def _ignore_token(tokens: List[Token]) -> List[Token]:
         """Returns tokens exclueded ones in abstract tree"""
 
-        result: List[Token] = []
+        if len(tokens) == 0:
+            return []
+
         ignore_kinds = [Token.WHITESPACE]
 
-        if len(tokens) == 0:
-            return result
-
-        for token in tokens:
-            if token.kind not in ignore_kinds:
-                result.append(token)
-
-        return result
+        return [token for token in tokens if token.kind not in ignore_kinds]
 
     def sqlftree(self) -> str:
         """Returns sql statement
@@ -270,28 +261,19 @@ class SyntaxTree:
             sql stetement
         """
 
-        return SyntaxTree._sqlftree(self)
+        return "\n".join(SyntaxTree._sqlftree(self))
 
     @staticmethod
-    def _sqlftree(tree: "SyntaxTree") -> str:
+    def _sqlftree(tree: SyntaxTree) -> Generator[str, None, None]:
         """Returns sql statement
 
         Returns:
             sql statement
         """
 
-        result = ""
         for leaf in tree.leaves:
-            if len(result) == 0:
-                result = leaf.text
-            else:
-                result = f"{result}\n{leaf.text}"
-
-            appendix = SyntaxTree._sqlftree(leaf)
-            if len(appendix) > 0:
-                result = f"{result}\n{appendix}"
-
-        return result
+            yield leaf.text
+            yield from SyntaxTree._sqlftree(leaf)
 
     def add_leaf(self, leaf: "SyntaxTree"):
         self.leaves.append(leaf)

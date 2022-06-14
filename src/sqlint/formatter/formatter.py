@@ -256,15 +256,10 @@ class BlankLineFormatter(Formatter):
 
             leaf = tree.leaves[index]
             tokens = leaf.tokens
-
+            token = tokens[0]
             try:
-                if (
-                    (tokens[0].kind == Token.BRACKET_RIGHT)
-                    or (tokens[0].kind == Token.IDENTIFIER)
-                    or (
-                        tokens[0] in [with_token, comma_token]
-                        and len(tokens) == 2
-                    )
+                if token.kind in (Token.BRACKET_RIGHT, Token.IDENTIFIER) or (
+                    token in (with_token, comma_token) and len(tokens) == 2
                 ):
                     tree.insert_leaf(
                         index + 1, SyntaxTree(depth=1, line_num=0)

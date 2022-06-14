@@ -87,16 +87,16 @@ def _reshape_tree(tree: SyntaxTree, config: Config):
     max_length = config.max_line_length
 
     if length > max_length:
-        _o, _c, _s = spt.LongLineSplitter.split(own, tree)
+        t_o, t_c, t_s = spt.LongLineSplitter.split(own, tree)
         """DEBUG
         if own and own[0].word.lower() == 'date_diff':
             logger.debug(f'    \033[92m_o\033[0m = {_o}')
             logger.debug(f'    \033[92m_c\033[0m = {_c}')
             logger.debug(f'    \033[92m_s\033[0m = {_s}')
         """
-        tree.tokens = _o
-        children = _c + children
-        siblings.insert(0, _s)
+        tree.tokens = t_o
+        children = t_c + children
+        siblings.insert(0, t_s)
 
     _tree: SyntaxTree
 
@@ -142,17 +142,19 @@ def _split_tokens(
     if not tokens:
         return [], [], []
 
-    if tokens[0].kind in [Token.KEYWORD, Token.FUNCTION]:
+    token = tokens[0]
+
+    if token.kind in [Token.KEYWORD, Token.FUNCTION]:
         return spt.KeywordSplitter.split(tokens, tree)
-    if tokens[0].kind == Token.COMMA:
+    if token.kind == Token.COMMA:
         return spt.CommaSplitter.split(tokens, tree)
-    if tokens[0].kind == Token.COMMENT:
+    if token.kind == Token.COMMENT:
         return tokens[0:1], [], tokens[1:]
-    if tokens[0].kind == Token.IDENTIFIER:
+    if token.kind == Token.IDENTIFIER:
         return spt.IdentifierSplitter.split(tokens, tree)
-    if tokens[0].kind in [Token.BRACKET_LEFT, Token.OPERATOR]:
+    if token.kind in [Token.BRACKET_LEFT, Token.OPERATOR]:
         return spt.Splitter.split_other(tokens)
-    if tokens[0].kind == Token.BRACKET_RIGHT:
+    if token.kind == Token.BRACKET_RIGHT:
         return spt.RightBrackerSplitter.split(tokens, tree)
     # ignores this case because this format method applies to abstract tree
     # excluding whitespaces.
