@@ -6,7 +6,7 @@ from .formatter import format as format_sql
 from .parser import parse as parse_sql
 from .syntax_tree import SyntaxTree
 
-__version__ = "0.2.4"
+__version__ = "0.2.5"
 
 __all__ = [
     "parse",

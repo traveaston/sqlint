@@ -17,7 +17,7 @@ include = []
 license = "MIT"
 name = "sqlint"
 readme = "README.rst"
-version = ""
+version = "v0.2.5"
 
 [tool.poetry.dependencies]
 click = "^7.0"
